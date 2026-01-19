@@ -18,9 +18,10 @@ A comprehensive meal planning application that helps users plan, track, and achi
 - **Authentication**: NextAuth.js (Auth.js)
 - **Database ORM**: Prisma
 
-### Database (Future Integration)
-- **Development**: SQLite (via Prisma)
-- **Production**: PostgreSQL (Vercel Postgres / Supabase / PlanetScale)
+### Database
+- **Provider**: Neon (Serverless PostgreSQL)
+- **ORM**: Prisma
+- **Features**: Auto-scaling, branching, generous free tier
 
 ### Deployment
 - **Platform**: Vercel

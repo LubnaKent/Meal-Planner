@@ -1,0 +1,167 @@
+// Prisma schema for Meal Planner
+// Database: Neon (Serverless PostgreSQL)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// User Management
+model User {
+  id             String          @id @default(cuid())
+  email          String          @unique
+  name           String?
+  password       String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  profile        Profile?
+  meals          Meal[]
+  logs           DailyLog[]
+  reminders      Reminder[]
+  rewards        Reward[]
+  favoriteSnacks FavoriteSnack[]
+}
+
+model Profile {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentWeight Float?
+  targetWeight  Float?
+  height        Float?
+  age           Int?
+  gender        String?
+  activityLevel String?
+  goalType      String?  // weight_loss, maintenance, muscle_gain
+  dailyCalories Int?
+  dietaryPrefs  String[] // vegetarian, vegan, keto, etc.
+  allergies     String[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// Meal System
+model Meal {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  calories    Int
+  protein     Float?
+  carbs       Float?
+  fats        Float?
+  fiber       Float?
+  benefits    String[]
+  cuisine     String?  // Italian, Indian, Mexican, etc.
+  mealType    String   // breakfast, lunch, dinner, snack
+  imageUrl    String?
+  recipe      String?  @db.Text
+  ingredients String[]
+  prepTime    Int?     // minutes
+  isGlobal    Boolean  @default(false)
+  createdBy   String?
+  user        User?    @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([mealType])
+  @@index([cuisine])
+  @@index([isGlobal])
+}
+
+// Daily Logging
+model DailyLog {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date             DateTime @db.Date
+  weight           Float?
+  caloriesConsumed Int?
+  caloriesTarget   Int?
+  waterIntake      Float?
+  mealsLogged      Json?    // Array of meal entries
+  notes            String?  @db.Text
+  mood             String?  // great, good, okay, bad
+  isOffDay         Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
+}
+
+// Reminder System
+model Reminder {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // meal, weight, water, goal_check
+  mealType  String?  // breakfast, lunch, dinner, snack
+  time      String   // HH:MM format
+  days      String[] // ["Mon", "Tue", ...]
+  isActive  Boolean  @default(true)
+  message   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isActive])
+}
+
+// Rewards System
+model Reward {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type         String   // streak, milestone, daily_treat, off_day
+  name         String
+  description  String?
+  earnedAt     DateTime @default(now())
+  snackReward  String?
+  offDayReward Boolean  @default(false)
+
+  @@index([userId])
+  @@index([type])
+}
+
+// Favorite Snacks (No Judgment Zone)
+model FavoriteSnack {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  calories  Int?
+  notes     String?  // Why it makes them happy
+  imageUrl  String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Global Meal Database (Pre-populated meals)
+model GlobalMeal {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  calories    Int
+  protein     Float?
+  carbs       Float?
+  fats        Float?
+  fiber       Float?
+  benefits    String[]
+  cuisine     String
+  mealType    String
+  imageUrl    String?
+  recipe      String?  @db.Text
+  ingredients String[]
+  prepTime    Int?
+  createdAt   DateTime @default(now())
+
+  @@index([mealType])
+  @@index([cuisine])
+}
