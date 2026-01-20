@@ -123,6 +123,15 @@
     "select": "Londa Olulimi",
     "english": "Lungereza",
     "swahili": "Lusuwayiri",
-    "luganda": "Luganda"
+    "luganda": "Luganda",
+    "luo": "Dholuo"
+  },
+  "trial": {
+    "daysRemaining": "ennaku ezisigadde mu kugezesa kwo okw'obwerere",
+    "trialEnded": "Okugezesa kwo okw'obwerere kuwedde",
+    "upgradeNow": "Yongera Obukadde Kati",
+    "startTrial": "Tandika Okugezesa Kwo okw'Ennaku 30 Obwerere",
+    "trialBenefits": "Fumba okukozesa kw'obujjuvu ebintu byonna okumala ennaku 30, tewetaagisa kusasula",
+    "subscribeNow": "Wewandiise Kati"
   }
 }

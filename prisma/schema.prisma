@@ -97,8 +97,15 @@ model Profile {
   medications       String[]
 
   // Preferences
-  language      String   @default("en") // en, sw (Swahili), lg (Luganda)
+  language      String   @default("en") // en, sw (Swahili), lg (Luganda), luo (Dholuo)
   timezone      String   @default("UTC")
+
+  // Trial & Subscription
+  trialStartDate    DateTime  @default(now())
+  trialEndDate      DateTime?
+  subscriptionStatus String   @default("trial") // trial, active, expired, cancelled
+  subscriptionPlan   String?  // basic, premium, family
+  subscriptionEndDate DateTime?
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

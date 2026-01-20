@@ -9,12 +9,14 @@ const languageNames: Record<Locale, string> = {
   en: 'English',
   sw: 'Kiswahili',
   lg: 'Luganda',
+  luo: 'Dholuo',
 }
 
 const languageFlags: Record<Locale, string> = {
   en: '🇬🇧',
   sw: '🇹🇿',
   lg: '🇺🇬',
+  luo: '🇰🇪',
 }
 
 export function LanguageSwitcher() {

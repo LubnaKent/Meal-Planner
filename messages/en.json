@@ -123,6 +123,15 @@
     "select": "Select Language",
     "english": "English",
     "swahili": "Kiswahili",
-    "luganda": "Luganda"
+    "luganda": "Luganda",
+    "luo": "Dholuo"
+  },
+  "trial": {
+    "daysRemaining": "days remaining in your free trial",
+    "trialEnded": "Your free trial has ended",
+    "upgradeNow": "Upgrade Now",
+    "startTrial": "Start Your 30-Day Free Trial",
+    "trialBenefits": "Get full access to all features for 30 days, no payment required",
+    "subscribeNow": "Subscribe Now"
   }
 }

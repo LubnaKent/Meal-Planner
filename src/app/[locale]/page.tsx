@@ -80,18 +80,25 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium mb-6">
+          <span>🎁</span>
+          {t('trial.startTrial')}
+        </div>
         <h1 className="text-5xl font-bold text-gray-900 mb-6">
           {t('landing.title')}
         </h1>
-        <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+        <p className="text-xl text-gray-600 mb-4 max-w-2xl mx-auto">
           {t('landing.subtitle')}
+        </p>
+        <p className="text-green-600 font-medium mb-8">
+          {t('trial.trialBenefits')}
         </p>
         <div className="flex gap-4 justify-center">
           <Link
             href="/register"
             className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium text-lg"
           >
-            {t('landing.getStarted')}
+            {t('trial.startTrial')}
           </Link>
           <Link
             href="#features"

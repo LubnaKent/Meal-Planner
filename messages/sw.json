@@ -123,6 +123,15 @@
     "select": "Chagua Lugha",
     "english": "Kiingereza",
     "swahili": "Kiswahili",
-    "luganda": "Luganda"
+    "luganda": "Luganda",
+    "luo": "Dholuo"
+  },
+  "trial": {
+    "daysRemaining": "siku zimebaki katika jaribio lako la bure",
+    "trialEnded": "Jaribio lako la bure limekwisha",
+    "upgradeNow": "Boresha Sasa",
+    "startTrial": "Anza Jaribio Lako la Siku 30 Bure",
+    "trialBenefits": "Pata ufikiaji kamili wa vipengele vyote kwa siku 30, hakuna malipo yanayohitajika",
+    "subscribeNow": "Jiandikishe Sasa"
   }
 }

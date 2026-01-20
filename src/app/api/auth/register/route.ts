@@ -38,10 +38,18 @@ export async function POST(request: Request) {
       },
     })
 
-    // Create default profile
+    // Calculate trial end date (30 days from now)
+    const trialStartDate = new Date()
+    const trialEndDate = new Date()
+    trialEndDate.setDate(trialEndDate.getDate() + 30)
+
+    // Create default profile with trial period
     await prisma.profile.create({
       data: {
         userId: user.id,
+        trialStartDate,
+        trialEndDate,
+        subscriptionStatus: 'trial',
       },
     })
 

@@ -4,10 +4,33 @@ import { useSession, signOut } from 'next-auth/react'
 import { Link } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import { LanguageSwitcher } from '@/components/language-switcher'
+import { TrialBanner } from '@/components/trial-banner'
+import { useEffect, useState } from 'react'
+
+interface SubscriptionData {
+  trialEndDate: string | null
+  subscriptionStatus: string
+}
 
 export default function DashboardPage() {
   const t = useTranslations()
   const { data: session } = useSession()
+  const [subscription, setSubscription] = useState<SubscriptionData | null>(null)
+
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      try {
+        const res = await fetch('/api/user/subscription')
+        if (res.ok) {
+          const data = await res.json()
+          setSubscription(data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch subscription:', error)
+      }
+    }
+    fetchSubscription()
+  }, [])
 
   // Mock data - will be replaced with real data from database
   const todayStats = {
@@ -42,6 +65,14 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Trial Banner */}
+      {subscription && (
+        <TrialBanner
+          trialEndDate={subscription.trialEndDate}
+          subscriptionStatus={subscription.subscriptionStatus}
+        />
+      )}
+
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
