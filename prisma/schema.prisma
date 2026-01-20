@@ -11,21 +11,71 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// User Management
+// ============ AUTHENTICATION (NextAuth.js) ============
+
 model User {
   id             String          @id @default(cuid())
   email          String          @unique
+  emailVerified  DateTime?
   name           String?
-  password       String
+  password       String?
+  image          String?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+
+  // NextAuth relations
+  accounts       Account[]
+  sessions       Session[]
+
+  // App relations
   profile        Profile?
   meals          Meal[]
   logs           DailyLog[]
   reminders      Reminder[]
   rewards        Reward[]
   favoriteSnacks FavoriteSnack[]
+  workouts       Workout[]
 }
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ============ USER PROFILE ============
 
 model Profile {
   id            String   @id @default(cuid())
@@ -41,11 +91,21 @@ model Profile {
   dailyCalories Int?
   dietaryPrefs  String[] // vegetarian, vegan, keto, etc.
   allergies     String[]
+
+  // Medical info
+  medicalConditions String[]
+  medications       String[]
+
+  // Preferences
+  language      String   @default("en") // en, sw (Swahili), lg (Luganda)
+  timezone      String   @default("UTC")
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
 
-// Meal System
+// ============ MEAL SYSTEM ============
+
 model Meal {
   id          String   @id @default(cuid())
   name        String
@@ -56,7 +116,7 @@ model Meal {
   fats        Float?
   fiber       Float?
   benefits    String[]
-  cuisine     String?  // Italian, Indian, Mexican, etc.
+  cuisine     String?  // Italian, Indian, Ugandan, etc.
   mealType    String   // breakfast, lunch, dinner, snack
   imageUrl    String?
   recipe      String?  @db.Text
@@ -73,7 +133,8 @@ model Meal {
   @@index([isGlobal])
 }
 
-// Daily Logging
+// ============ DAILY LOGGING ============
+
 model DailyLog {
   id               String   @id @default(cuid())
   userId           String
@@ -95,12 +156,13 @@ model DailyLog {
   @@index([date])
 }
 
-// Reminder System
+// ============ REMINDER SYSTEM ============
+
 model Reminder {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      String   // meal, weight, water, goal_check
+  type      String   // meal, weight, water, goal_check, workout
   mealType  String?  // breakfast, lunch, dinner, snack
   time      String   // HH:MM format
   days      String[] // ["Mon", "Tue", ...]
@@ -113,23 +175,26 @@ model Reminder {
   @@index([isActive])
 }
 
-// Rewards System
+// ============ REWARDS SYSTEM ============
+
 model Reward {
   id           String   @id @default(cuid())
   userId       String
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type         String   // streak, milestone, daily_treat, off_day
+  type         String   // streak, milestone, daily_treat, off_day, workout
   name         String
   description  String?
   earnedAt     DateTime @default(now())
   snackReward  String?
   offDayReward Boolean  @default(false)
+  tokens       Int      @default(0) // Workout tokens
 
   @@index([userId])
   @@index([type])
 }
 
-// Favorite Snacks (No Judgment Zone)
+// ============ FAVORITE SNACKS ============
+
 model FavoriteSnack {
   id        String   @id @default(cuid())
   userId    String
@@ -143,10 +208,32 @@ model FavoriteSnack {
   @@index([userId])
 }
 
-// Global Meal Database (Pre-populated meals)
+// ============ WORKOUT SYSTEM ============
+
+model Workout {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  type         String   // home, gym, cardio, strength, yoga
+  duration     Int      // minutes
+  caloriesBurned Int?
+  intensity    String?  // low, medium, high
+  notes        String?
+  tokensEarned Int      @default(0)
+  completedAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([type])
+}
+
+// ============ GLOBAL MEAL DATABASE ============
+
 model GlobalMeal {
   id          String   @id @default(cuid())
   name        String
+  nameSwahili String?  // Swahili translation
+  nameLuganda String?  // Luganda translation
   description String?
   calories    Int
   protein     Float?
@@ -155,13 +242,17 @@ model GlobalMeal {
   fiber       Float?
   benefits    String[]
   cuisine     String
+  country     String?  // Uganda, Kenya, Tanzania, etc.
   mealType    String
   imageUrl    String?
   recipe      String?  @db.Text
   ingredients String[]
   prepTime    Int?
+  isVegetarian Boolean @default(false)
+  isVegan      Boolean @default(false)
   createdAt   DateTime @default(now())
 
   @@index([mealType])
   @@index([cuisine])
+  @@index([country])
 }

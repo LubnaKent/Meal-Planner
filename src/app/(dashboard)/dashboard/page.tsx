@@ -1,8 +1,11 @@
 'use client'
 
+import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 
 export default function DashboardPage() {
+  const { data: session } = useSession()
+
   // Mock data - will be replaced with real data from database
   const todayStats = {
     caloriesConsumed: 1250,
@@ -22,6 +25,17 @@ export default function DashboardPage() {
   ]
 
   const caloriePercentage = Math.round((todayStats.caloriesConsumed / todayStats.caloriesTarget) * 100)
+
+  const getGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour < 12) return 'Good morning'
+    if (hour < 18) return 'Good afternoon'
+    return 'Good evening'
+  }
+
+  const handleSignOut = () => {
+    signOut({ callbackUrl: '/' })
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -46,6 +60,31 @@ export default function DashboardPage() {
             <Link href="/dashboard/settings" className="p-2 text-gray-600 hover:text-green-600">
               <span className="text-xl">⚙️</span>
             </Link>
+            <div className="relative group">
+              <button className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100">
+                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-medium">
+                  {session?.user?.name?.charAt(0).toUpperCase() || 'U'}
+                </div>
+                <span className="hidden md:inline text-sm text-gray-700">
+                  {session?.user?.name || 'User'}
+                </span>
+              </button>
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                <div className="p-3 border-b border-gray-100">
+                  <p className="font-medium text-gray-900">{session?.user?.name}</p>
+                  <p className="text-sm text-gray-500">{session?.user?.email}</p>
+                </div>
+                <Link href="/dashboard/settings" className="block px-4 py-2 text-gray-700 hover:bg-gray-50">
+                  Settings
+                </Link>
+                <button
+                  onClick={handleSignOut}
+                  className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
+                >
+                  Sign out
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </header>
@@ -53,8 +92,10 @@ export default function DashboardPage() {
       <main className="container mx-auto px-4 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Good morning! 👋</h1>
-          <p className="text-gray-600">Here's your meal plan for today. You're doing great!</p>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {getGreeting()}, {session?.user?.name?.split(' ')[0] || 'there'}! 👋
+          </h1>
+          <p className="text-gray-600">Here&apos;s your meal plan for today. You&apos;re doing great!</p>
         </div>
 
         {/* Stats Grid */}
@@ -116,14 +157,14 @@ export default function DashboardPage() {
               </div>
               <span className="text-2xl">🔥</span>
             </div>
-            <p className="text-sm text-green-100">Keep it up! You're on fire!</p>
+            <p className="text-sm text-green-100">Keep it up! You&apos;re on fire!</p>
           </div>
         </div>
 
         {/* Today's Meals */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-semibold text-gray-900">Today's Meals</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Today&apos;s Meals</h2>
             <Link href="/dashboard/meals" className="text-green-600 hover:text-green-700 text-sm font-medium">
               View all →
             </Link>
@@ -166,7 +207,7 @@ export default function DashboardPage() {
           >
             <span className="text-3xl mb-3 block">➕</span>
             <h3 className="font-semibold text-gray-900 group-hover:text-green-600">Add Meal</h3>
-            <p className="text-sm text-gray-500">Log a meal you've eaten</p>
+            <p className="text-sm text-gray-500">Log a meal you&apos;ve eaten</p>
           </Link>
           <Link
             href="/dashboard/progress"
