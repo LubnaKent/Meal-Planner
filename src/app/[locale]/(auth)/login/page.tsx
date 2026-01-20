@@ -2,10 +2,12 @@
 
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useRouter } from '@/i18n/navigation'
+import { Link } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 
 export default function LoginPage() {
+  const t = useTranslations()
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -25,7 +27,7 @@ export default function LoginPage() {
       })
 
       if (result?.error) {
-        setError('Invalid email or password')
+        setError(t('auth.invalidCredentials'))
         setIsLoading(false)
         return
       }
@@ -33,7 +35,7 @@ export default function LoginPage() {
       router.push('/dashboard')
       router.refresh()
     } catch {
-      setError('Something went wrong. Please try again.')
+      setError(t('auth.somethingWrong'))
       setIsLoading(false)
     }
   }
@@ -44,10 +46,10 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
             <span className="text-3xl">🥗</span>
-            <span className="text-2xl font-bold text-green-700">MealPlanner</span>
+            <span className="text-2xl font-bold text-green-700">{t('common.appName')}</span>
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
-          <p className="text-gray-600 mt-2">Sign in to continue your health journey</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('auth.welcomeBack')}</h1>
+          <p className="text-gray-600 mt-2">{t('auth.signInContinue')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
@@ -60,7 +62,7 @@ export default function LoginPage() {
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
+                {t('auth.email')}
               </label>
               <input
                 id="email"
@@ -75,7 +77,7 @@ export default function LoginPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
+                {t('auth.password')}
               </label>
               <input
                 id="password"
@@ -91,10 +93,10 @@ export default function LoginPage() {
             <div className="flex items-center justify-between">
               <label className="flex items-center">
                 <input type="checkbox" className="rounded border-gray-300 text-green-600 focus:ring-green-500" />
-                <span className="ml-2 text-sm text-gray-600">Remember me</span>
+                <span className="ml-2 text-sm text-gray-600">{t('auth.rememberMe')}</span>
               </label>
               <Link href="/forgot-password" className="text-sm text-green-600 hover:text-green-700">
-                Forgot password?
+                {t('auth.forgotPassword')}
               </Link>
             </div>
 
@@ -103,15 +105,15 @@ export default function LoginPage() {
               disabled={isLoading}
               className="w-full py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              {isLoading ? t('auth.signingIn') : t('auth.signIn')}
             </button>
           </div>
         </form>
 
         <p className="text-center mt-6 text-gray-600">
-          Don&apos;t have an account?{' '}
+          {t('auth.noAccount')}{' '}
           <Link href="/register" className="text-green-600 hover:text-green-700 font-medium">
-            Sign up
+            {t('auth.signUp')}
           </Link>
         </p>
       </div>

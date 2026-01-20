@@ -2,10 +2,12 @@
 
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useRouter } from '@/i18n/navigation'
+import { Link } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 
 export default function RegisterPage() {
+  const t = useTranslations()
   const router = useRouter()
   const [formData, setFormData] = useState({
     name: '',
@@ -25,12 +27,12 @@ export default function RegisterPage() {
     setError('')
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match')
+      setError(t('auth.passwordMismatch'))
       return
     }
 
     if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters')
+      setError(t('auth.passwordRequirement'))
       return
     }
 
@@ -53,7 +55,7 @@ export default function RegisterPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Registration failed')
+        setError(data.error || t('auth.registrationFailed'))
         setIsLoading(false)
         return
       }
@@ -74,7 +76,7 @@ export default function RegisterPage() {
       router.push('/dashboard')
       router.refresh()
     } catch {
-      setError('Something went wrong. Please try again.')
+      setError(t('auth.somethingWrong'))
       setIsLoading(false)
     }
   }
@@ -85,10 +87,10 @@ export default function RegisterPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
             <span className="text-3xl">🥗</span>
-            <span className="text-2xl font-bold text-green-700">MealPlanner</span>
+            <span className="text-2xl font-bold text-green-700">{t('common.appName')}</span>
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Create your account</h1>
-          <p className="text-gray-600 mt-2">Start your journey to healthier eating</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('auth.createAccount')}</h1>
+          <p className="text-gray-600 mt-2">{t('auth.startJourney')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
@@ -101,7 +103,7 @@ export default function RegisterPage() {
           <div className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Full Name
+                {t('auth.fullName')}
               </label>
               <input
                 id="name"
@@ -117,7 +119,7 @@ export default function RegisterPage() {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
+                {t('auth.email')}
               </label>
               <input
                 id="email"
@@ -133,7 +135,7 @@ export default function RegisterPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
+                {t('auth.password')}
               </label>
               <input
                 id="password"
@@ -146,12 +148,12 @@ export default function RegisterPage() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                 placeholder="••••••••"
               />
-              <p className="text-xs text-gray-500 mt-1">Must be at least 8 characters</p>
+              <p className="text-xs text-gray-500 mt-1">{t('auth.passwordRequirement')}</p>
             </div>
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                Confirm Password
+                {t('auth.confirmPassword')}
               </label>
               <input
                 id="confirmPassword"
@@ -172,13 +174,13 @@ export default function RegisterPage() {
                 className="mt-1 rounded border-gray-300 text-green-600 focus:ring-green-500"
               />
               <span className="ml-2 text-sm text-gray-600">
-                I agree to the{' '}
+                {t('auth.termsAgree')}{' '}
                 <Link href="/terms" className="text-green-600 hover:text-green-700">
-                  Terms of Service
+                  {t('auth.termsOfService')}
                 </Link>{' '}
-                and{' '}
+                {t('common.and')}{' '}
                 <Link href="/privacy" className="text-green-600 hover:text-green-700">
-                  Privacy Policy
+                  {t('auth.privacyPolicy')}
                 </Link>
               </span>
             </div>
@@ -188,15 +190,15 @@ export default function RegisterPage() {
               disabled={isLoading}
               className="w-full py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Creating account...' : 'Create account'}
+              {isLoading ? t('auth.creatingAccount') : t('auth.signUp')}
             </button>
           </div>
         </form>
 
         <p className="text-center mt-6 text-gray-600">
-          Already have an account?{' '}
+          {t('auth.haveAccount')}{' '}
           <Link href="/login" className="text-green-600 hover:text-green-700 font-medium">
-            Sign in
+            {t('auth.signIn')}
           </Link>
         </p>
       </div>
