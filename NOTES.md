@@ -126,4 +126,6 @@ RESEND_API_KEY=      # For email reminders
 
 ## Notes
 
-_Add your development notes here as you work on the project._
+_Nxt to do om meal-planner project: 
+- set up authentication
+

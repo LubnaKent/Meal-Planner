@@ -114,6 +114,64 @@ A comprehensive meal planning application that helps users plan, track, and achi
 - Integration with reward system
 - Calorie tracking (optional for off days)
 
+### 9. Exercise & Workout System (NEW)
+- **Home Workouts**: Bodyweight exercises, yoga, stretching
+- **Gym Workouts**: Equipment-based routines
+- **Workout Tokens**: Earn tokens for completed workouts
+- **Exercise Log**: Track workouts with duration and intensity
+- **Goal Alignment**: Workouts matched to health goals (weight loss, muscle gain, etc.)
+- **Calorie Burn Tracking**: Estimate calories burned per workout
+
+### 10. Medical & Health Conditions (NEW)
+- **Health Conditions Input**: Diabetes, hypertension, allergies, etc.
+- **Medical Reports Upload**: Store and reference medical documents
+- **Condition-Aware Meals**: Meal suggestions that consider health conditions
+- **Condition-Aware Workouts**: Exercise recommendations safe for conditions
+- **Doctor Reports**: Generate summarized health reports for appointments
+- **Hospital Integration**: Shareable reports for healthcare providers
+
+### 11. Internationalization (i18n) (NEW)
+- **Supported Languages**:
+  - English (default)
+  - Swahili (Kiswahili)
+  - Luganda
+  - French
+  - More languages planned
+- **Localized Meals**: Dishes in local languages
+- **East African Cuisine**:
+  - Ugandan dishes (Matooke, Rolex, Luwombo, Posho)
+  - Kenyan dishes (Ugali, Nyama Choma, Sukuma Wiki)
+  - Tanzanian dishes (Pilau, Mishkaki, Chipsi Mayai)
+  - Rwandan dishes (Isombe, Brochettes, Ubugali)
+  - Burundian dishes (Beans & Plantains, Mukeke)
+
+### 12. App Integrations & Sync (NEW)
+- **Fitness App Sync**: Apple Health, Google Fit, Fitbit
+- **Calendar Sync**: Google Calendar, Outlook
+- **Wearables**: Smartwatch compatibility
+- **Export Data**: CSV, PDF exports
+
+### 13. Quick Access & Widgets (NEW)
+- **Dashboard Shortcuts**: One-tap access to key features
+- **Real-time Reminders**: Priority notification display
+- **Today's Summary Widget**: Quick overview card
+- **PWA Home Screen Widget**: Mobile quick access
+
+### 14. Meal Simplicity & Diversity (NEW)
+- **Easy Prep Meals**: Under 15-minute recipes
+- **Raw Options**: Salads, fresh fruits, smoothies
+- **No-Cook Meals**: Assembly-only meals
+- **Ingredient Substitutes**: Flexible ingredient options
+- **Budget-Friendly**: Affordable meal alternatives
+
+### 15. Engagement & Gamification (NEW)
+- **Daily Challenges**: Small achievable goals
+- **Achievement System**: Badges and milestones
+- **Streak Bonuses**: Extra rewards for consistency
+- **Motivational Messages**: Personalized encouragement
+- **Progress Celebrations**: Milestone animations
+- **Community Features**: Optional social sharing
+
 ---
 
 ## Database Schema (Preliminary)
@@ -321,6 +379,24 @@ meal-planner/
 4. AI-powered meal suggestions
 5. Push notifications
 6. Mobile PWA optimization
+
+## Phase 4 Features (NEW)
+1. Exercise & Workout tracking
+2. Workout tokens system
+3. Medical conditions support
+4. Doctor report generation
+5. Internationalization (Swahili, Luganda)
+6. East African cuisine database
+7. App integrations (fitness trackers)
+8. Quick access widgets
+
+## Phase 5 Features (Future)
+1. Hospital integration API
+2. Community features
+3. Wearable device sync
+4. Voice commands
+5. AI personal trainer
+6. Meal delivery partnerships
 
 ---
 
