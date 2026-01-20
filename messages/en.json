@@ -124,7 +124,8 @@
     "english": "English",
     "swahili": "Kiswahili",
     "luganda": "Luganda",
-    "luo": "Dholuo"
+    "luo": "Dholuo",
+    "acholi": "Leb Acholi"
   },
   "trial": {
     "daysRemaining": "days remaining in your free trial",
@@ -133,5 +134,30 @@
     "startTrial": "Start Your 30-Day Free Trial",
     "trialBenefits": "Get full access to all features for 30 days, no payment required",
     "subscribeNow": "Subscribe Now"
+  },
+  "foodMenu": {
+    "title": "Ugandan Food Menu",
+    "description": "Discover traditional and modern Ugandan dishes",
+    "categories": {
+      "all": "All",
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "snacks": "Snacks",
+      "traditional": "Traditional"
+    },
+    "calories": "Calories",
+    "prepTime": "Prep time",
+    "minutes": "minutes",
+    "ingredients": "Ingredients",
+    "benefits": "Health Benefits",
+    "viewRecipe": "View Recipe",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fats": "Fats",
+    "fiber": "Fiber",
+    "region": "Region",
+    "vegetarian": "Vegetarian",
+    "vegan": "Vegan"
   }
 }

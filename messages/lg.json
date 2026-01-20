@@ -124,7 +124,8 @@
     "english": "Lungereza",
     "swahili": "Lusuwayiri",
     "luganda": "Luganda",
-    "luo": "Dholuo"
+    "luo": "Dholuo",
+    "acholi": "Leb Acholi"
   },
   "trial": {
     "daysRemaining": "ennaku ezisigadde mu kugezesa kwo okw'obwerere",
@@ -133,5 +134,30 @@
     "startTrial": "Tandika Okugezesa Kwo okw'Ennaku 30 Obwerere",
     "trialBenefits": "Fumba okukozesa kw'obujjuvu ebintu byonna okumala ennaku 30, tewetaagisa kusasula",
     "subscribeNow": "Wewandiise Kati"
+  },
+  "foodMenu": {
+    "title": "Emmere ey'Uganda",
+    "description": "Zuula emmere ey'obuwangwa n'empya ey'Uganda",
+    "categories": {
+      "all": "Byonna",
+      "breakfast": "Eky'Enkya",
+      "lunch": "Eky'Ettuntu",
+      "dinner": "Eky'Akawungeezi",
+      "snacks": "Ebinyweebwa",
+      "traditional": "Ey'Obuwangwa"
+    },
+    "calories": "Kkalori",
+    "prepTime": "Obudde bw'okutegeka",
+    "minutes": "eddakiika",
+    "ingredients": "Ebikozesebwa",
+    "benefits": "Emigaso gy'Obulamu",
+    "viewRecipe": "Laba Engeri y'Okufumba",
+    "protein": "Puloteyini",
+    "carbs": "Kabohaayiduleti",
+    "fats": "Amafuta",
+    "fiber": "Fayiba",
+    "region": "Ekitundu",
+    "vegetarian": "Ey'Emboga",
+    "vegan": "Ey'Emboga Zokka"
   }
 }

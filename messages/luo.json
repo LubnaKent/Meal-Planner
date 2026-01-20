@@ -117,7 +117,8 @@
     "english": "English",
     "swahili": "Kiswahili",
     "luganda": "Luganda",
-    "luo": "Dholuo"
+    "luo": "Dholuo",
+    "acholi": "Leb Acholi"
   },
   "trial": {
     "daysRemaining": "Ndalo modong' e tem",
@@ -126,5 +127,30 @@
     "startTrial": "Chakri Tem mar Ndalo 30 Nono",
     "trialBenefits": "Yud gik moko duto kuom ndalo 30 ma onge chudo",
     "subscribeNow": "Ndikri Sani"
+  },
+  "foodMenu": {
+    "title": "Chiemo mag Uganda",
+    "description": "Non chiemo mag jo Uganda machon kod manyien",
+    "categories": {
+      "all": "Duto",
+      "breakfast": "Chiemo mokinyi",
+      "lunch": "Chiemo mar odiechieng'",
+      "dinner": "Chiemo mar odhiambo",
+      "snacks": "Chiemo matin",
+      "traditional": "Chiemo mag Jogi wa"
+    },
+    "calories": "Calories",
+    "prepTime": "Saa mar tedo",
+    "minutes": "dakika",
+    "ingredients": "Gik mitedogo",
+    "benefits": "Ber ne ngima",
+    "viewRecipe": "Ne yo mar tedo",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fats": "Moo",
+    "fiber": "Fiber",
+    "region": "Kar",
+    "vegetarian": "Alot kende",
+    "vegan": "Vegan"
   }
 }

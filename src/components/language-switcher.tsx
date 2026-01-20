@@ -10,6 +10,7 @@ const languageNames: Record<Locale, string> = {
   sw: 'Kiswahili',
   lg: 'Luganda',
   luo: 'Dholuo',
+  ach: 'Leb Acholi',
 }
 
 const languageFlags: Record<Locale, string> = {
@@ -17,6 +18,7 @@ const languageFlags: Record<Locale, string> = {
   sw: '🇹🇿',
   lg: '🇺🇬',
   luo: '🇰🇪',
+  ach: '🇺🇬',
 }
 
 export function LanguageSwitcher() {

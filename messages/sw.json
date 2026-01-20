@@ -124,7 +124,8 @@
     "english": "Kiingereza",
     "swahili": "Kiswahili",
     "luganda": "Luganda",
-    "luo": "Dholuo"
+    "luo": "Dholuo",
+    "acholi": "Leb Acholi"
   },
   "trial": {
     "daysRemaining": "siku zimebaki katika jaribio lako la bure",
@@ -133,5 +134,30 @@
     "startTrial": "Anza Jaribio Lako la Siku 30 Bure",
     "trialBenefits": "Pata ufikiaji kamili wa vipengele vyote kwa siku 30, hakuna malipo yanayohitajika",
     "subscribeNow": "Jiandikishe Sasa"
+  },
+  "foodMenu": {
+    "title": "Menyu ya Chakula cha Uganda",
+    "description": "Gundua vyakula vya jadi na vya kisasa vya Uganda",
+    "categories": {
+      "all": "Vyote",
+      "breakfast": "Kifungua Kinywa",
+      "lunch": "Chakula cha Mchana",
+      "dinner": "Chakula cha Jioni",
+      "snacks": "Vitafunio",
+      "traditional": "Vyakula vya Jadi"
+    },
+    "calories": "Kalori",
+    "prepTime": "Muda wa kuandaa",
+    "minutes": "dakika",
+    "ingredients": "Viungo",
+    "benefits": "Faida za Afya",
+    "viewRecipe": "Ona Mapishi",
+    "protein": "Protini",
+    "carbs": "Wanga",
+    "fats": "Mafuta",
+    "fiber": "Nyuzinyuzi",
+    "region": "Eneo",
+    "vegetarian": "Mboga tu",
+    "vegan": "Vegan"
   }
 }
