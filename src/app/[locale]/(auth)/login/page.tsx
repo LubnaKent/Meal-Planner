@@ -20,6 +20,29 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
+      // First validate credentials through rate-limited API
+      const validateResponse = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const validateData = await validateResponse.json()
+
+      if (!validateResponse.ok) {
+        if (validateResponse.status === 429) {
+          setError(t('auth.tooManyAttempts'))
+        } else if (validateData.details) {
+          // Validation errors
+          setError(validateData.details[0]?.message || t('auth.invalidCredentials'))
+        } else {
+          setError(validateData.error || t('auth.invalidCredentials'))
+        }
+        setIsLoading(false)
+        return
+      }
+
+      // Credentials valid, now create session with NextAuth
       const result = await signIn('credentials', {
         email,
         password,

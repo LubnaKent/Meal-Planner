@@ -9,7 +9,7 @@ const intlMiddleware = createMiddleware(routing)
 const { auth } = NextAuth(authConfig)
 
 // Public routes that don't require authentication
-const publicRoutes = ['/', '/login', '/register']
+const publicRoutes = ['/', '/login', '/register', '/dashboard/food-menu']
 
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl

@@ -5,17 +5,48 @@ import { Link } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { TrialBanner } from '@/components/trial-banner'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
+import { MealEntry, MealsLoggedData } from '@/lib/validations/meals'
 
 interface SubscriptionData {
   trialEndDate: string | null
   subscriptionStatus: string
 }
 
+interface DailyLogData {
+  id?: string
+  date: string
+  mealsLogged: MealsLoggedData
+  caloriesConsumed: number
+  caloriesTarget: number
+  waterIntake: number
+  weight: number | null
+  mood: string | null
+  notes: string | null
+  isOffDay: boolean
+}
+
 export default function DashboardPage() {
   const t = useTranslations()
   const { data: session } = useSession()
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null)
+  const [dailyLog, setDailyLog] = useState<DailyLogData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [waterUpdating, setWaterUpdating] = useState(false)
+
+  const fetchDailyLog = useCallback(async () => {
+    try {
+      const res = await fetch('/api/daily-log')
+      if (res.ok) {
+        const data = await res.json()
+        setDailyLog(data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch daily log:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
     const fetchSubscription = async () => {
@@ -30,27 +61,85 @@ export default function DashboardPage() {
       }
     }
     fetchSubscription()
-  }, [])
+    fetchDailyLog()
+  }, [fetchDailyLog])
 
-  // Mock data - will be replaced with real data from database
+  // Calculate stats from daily log
   const todayStats = {
-    caloriesConsumed: 1250,
-    caloriesTarget: 2000,
-    mealsCompleted: 2,
-    mealsTotal: 4,
-    waterIntake: 5,
+    caloriesConsumed: dailyLog?.caloriesConsumed || 0,
+    caloriesTarget: dailyLog?.caloriesTarget || 2000,
+    mealsCompleted: dailyLog?.mealsLogged?.meals?.filter(m => m.completed).length || 0,
+    mealsTotal: dailyLog?.mealsLogged?.meals?.length || 0,
+    waterIntake: dailyLog?.waterIntake || 0,
     waterTarget: 8,
-    currentStreak: 7,
+    currentStreak: 7, // TODO: Calculate from historical data
   }
 
-  const todaysMeals = [
-    { type: t('meals.breakfast'), time: '8:00 AM', name: 'Oatmeal with Berries', calories: 350, completed: true },
-    { type: t('meals.lunch'), time: '12:30 PM', name: 'Grilled Chicken Salad', calories: 450, completed: true },
-    { type: t('meals.snack'), time: '3:30 PM', name: 'Greek Yogurt', calories: 150, completed: false },
-    { type: t('meals.dinner'), time: '7:00 PM', name: 'Salmon with Vegetables', calories: 550, completed: false },
-  ]
+  // Group meals by type for display
+  const getMealsByType = () => {
+    const meals = dailyLog?.mealsLogged?.meals || []
+    const mealTypes = ['breakfast', 'lunch', 'snack', 'dinner'] as const
+
+    return mealTypes.map(type => {
+      const meal = meals.find(m => m.mealType === type)
+      return {
+        type: t(`meals.${type}`),
+        mealType: type,
+        time: meal?.time || getDefaultTime(type),
+        name: meal?.name || null,
+        calories: meal ? Math.round(meal.calories * (meal.servingSize || 1)) : 0,
+        completed: meal?.completed || false,
+        id: meal?.id || null,
+      }
+    })
+  }
+
+  const getDefaultTime = (type: string) => {
+    switch (type) {
+      case 'breakfast': return '8:00'
+      case 'lunch': return '12:30'
+      case 'snack': return '15:30'
+      case 'dinner': return '19:00'
+      default: return '12:00'
+    }
+  }
+
+  const handleToggleMealComplete = async (mealId: string, completed: boolean) => {
+    try {
+      const res = await fetch('/api/daily-log/meals', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mealId, completed }),
+      })
+      if (res.ok) {
+        fetchDailyLog()
+      }
+    } catch (error) {
+      console.error('Failed to toggle meal:', error)
+    }
+  }
+
+  const handleUpdateWater = async (increment: number) => {
+    const newIntake = Math.max(0, Math.min(20, todayStats.waterIntake + increment))
+    setWaterUpdating(true)
+    try {
+      const res = await fetch('/api/daily-log', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ waterIntake: newIntake }),
+      })
+      if (res.ok) {
+        setDailyLog(prev => prev ? { ...prev, waterIntake: newIntake } : null)
+      }
+    } catch (error) {
+      console.error('Failed to update water:', error)
+    } finally {
+      setWaterUpdating(false)
+    }
+  }
 
   const caloriePercentage = Math.round((todayStats.caloriesConsumed / todayStats.caloriesTarget) * 100)
+  const todaysMeals = getMealsByType()
 
   const getGreeting = () => {
     const hour = new Date().getHours()
@@ -82,7 +171,7 @@ export default function DashboardPage() {
           </div>
           <nav className="hidden md:flex gap-6">
             <Link href="/dashboard" className="text-green-600 font-medium">{t('nav.dashboard')}</Link>
-            <Link href="/dashboard/meals" className="text-gray-600 hover:text-green-600">{t('nav.meals')}</Link>
+            <Link href="/dashboard/food-menu" className="text-gray-600 hover:text-green-600">{t('nav.meals')}</Link>
             <Link href="/dashboard/progress" className="text-gray-600 hover:text-green-600">{t('nav.progress')}</Link>
             <Link href="/dashboard/reminders" className="text-gray-600 hover:text-green-600">{t('nav.reminders')}</Link>
             <Link href="/dashboard/rewards" className="text-gray-600 hover:text-green-600">{t('nav.rewards')}</Link>
@@ -133,134 +222,196 @@ export default function DashboardPage() {
           <p className="text-gray-600">{t('dashboard.mealPlanToday')}</p>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid md:grid-cols-4 gap-4 mb-8">
-          {/* Calories Card */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <p className="text-sm text-gray-500">{t('dashboard.calories')}</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {todayStats.caloriesConsumed} <span className="text-sm font-normal text-gray-500">/ {todayStats.caloriesTarget}</span>
-                </p>
-              </div>
-              <span className="text-2xl">🔥</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-green-500 h-2 rounded-full transition-all"
-                style={{ width: `${Math.min(caloriePercentage, 100)}%` }}
-              />
-            </div>
-            <p className="text-xs text-gray-500 mt-2">{caloriePercentage}% {t('dashboard.ofDailyGoal')}</p>
+        {isLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
           </div>
-
-          {/* Meals Card */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <p className="text-sm text-gray-500">{t('dashboard.meals')}</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {todayStats.mealsCompleted} <span className="text-sm font-normal text-gray-500">/ {todayStats.mealsTotal}</span>
-                </p>
-              </div>
-              <span className="text-2xl">🍽️</span>
-            </div>
-            <p className="text-sm text-green-600">{todayStats.mealsTotal - todayStats.mealsCompleted} {t('dashboard.mealsRemaining')}</p>
-          </div>
-
-          {/* Water Card */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <p className="text-sm text-gray-500">{t('dashboard.water')}</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {todayStats.waterIntake} <span className="text-sm font-normal text-gray-500">/ {todayStats.waterTarget} {t('dashboard.glasses')}</span>
-                </p>
-              </div>
-              <span className="text-2xl">💧</span>
-            </div>
-            <p className="text-sm text-blue-600">{todayStats.waterTarget - todayStats.waterIntake} {t('dashboard.moreToGo')}</p>
-          </div>
-
-          {/* Streak Card */}
-          <div className="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-xl shadow-sm text-white">
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <p className="text-sm text-green-100">{t('dashboard.currentStreak')}</p>
-                <p className="text-2xl font-bold">{todayStats.currentStreak} {t('dashboard.days')}</p>
-              </div>
-              <span className="text-2xl">🔥</span>
-            </div>
-            <p className="text-sm text-green-100">{t('dashboard.keepItUp')}</p>
-          </div>
-        </div>
-
-        {/* Today's Meals */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-semibold text-gray-900">{t('dashboard.todaysMeals')}</h2>
-            <Link href="/dashboard/meals" className="text-green-600 hover:text-green-700 text-sm font-medium">
-              {t('dashboard.viewAll')} →
-            </Link>
-          </div>
-          <div className="space-y-4">
-            {todaysMeals.map((meal, index) => (
-              <div
-                key={index}
-                className={`flex items-center justify-between p-4 rounded-lg border ${
-                  meal.completed ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
-                }`}
-              >
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    meal.completed ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
-                  }`}>
-                    {meal.completed ? '✓' : index + 1}
-                  </div>
+        ) : (
+          <>
+            {/* Stats Grid */}
+            <div className="grid md:grid-cols-4 gap-4 mb-8">
+              {/* Calories Card */}
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="flex justify-between items-start mb-4">
                   <div>
-                    <p className="font-medium text-gray-900">{meal.name}</p>
-                    <p className="text-sm text-gray-500">{meal.type} • {meal.time}</p>
+                    <p className="text-sm text-gray-500">{t('dashboard.calories')}</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {todayStats.caloriesConsumed} <span className="text-sm font-normal text-gray-500">/ {todayStats.caloriesTarget}</span>
+                    </p>
                   </div>
+                  <span className="text-2xl">🔥</span>
                 </div>
-                <div className="text-right">
-                  <p className="font-medium text-gray-900">{meal.calories} {t('dashboard.cal')}</p>
-                  {!meal.completed && (
-                    <button className="text-sm text-green-600 hover:text-green-700">{t('dashboard.markComplete')}</button>
-                  )}
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full transition-all ${
+                      caloriePercentage > 100 ? 'bg-red-500' : 'bg-green-500'
+                    }`}
+                    style={{ width: `${Math.min(caloriePercentage, 100)}%` }}
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-2">{caloriePercentage}% {t('dashboard.ofDailyGoal')}</p>
+              </div>
+
+              {/* Meals Card */}
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="text-sm text-gray-500">{t('dashboard.meals')}</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {todayStats.mealsCompleted} <span className="text-sm font-normal text-gray-500">/ {todayStats.mealsTotal || 4}</span>
+                    </p>
+                  </div>
+                  <span className="text-2xl">🍽️</span>
+                </div>
+                <p className="text-sm text-green-600">
+                  {todayStats.mealsTotal === 0
+                    ? t('dashboard.addMeal')
+                    : `${(todayStats.mealsTotal || 4) - todayStats.mealsCompleted} ${t('dashboard.mealsRemaining')}`
+                  }
+                </p>
+              </div>
+
+              {/* Water Card */}
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="text-sm text-gray-500">{t('dashboard.water')}</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {todayStats.waterIntake} <span className="text-sm font-normal text-gray-500">/ {todayStats.waterTarget} {t('dashboard.glasses')}</span>
+                    </p>
+                  </div>
+                  <span className="text-2xl">💧</span>
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                  <button
+                    onClick={() => handleUpdateWater(-1)}
+                    disabled={waterUpdating || todayStats.waterIntake <= 0}
+                    className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50 flex items-center justify-center"
+                  >
+                    -
+                  </button>
+                  <div className="flex-1 bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-blue-500 h-2 rounded-full transition-all"
+                      style={{ width: `${Math.min((todayStats.waterIntake / todayStats.waterTarget) * 100, 100)}%` }}
+                    />
+                  </div>
+                  <button
+                    onClick={() => handleUpdateWater(1)}
+                    disabled={waterUpdating}
+                    className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 disabled:opacity-50 flex items-center justify-center"
+                  >
+                    +
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Quick Actions */}
-        <div className="grid md:grid-cols-3 gap-4">
-          <Link
-            href="/dashboard/meals/add"
-            className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:border-green-300 transition-colors group"
-          >
-            <span className="text-3xl mb-3 block">➕</span>
-            <h3 className="font-semibold text-gray-900 group-hover:text-green-600">{t('dashboard.addMeal')}</h3>
-            <p className="text-sm text-gray-500">{t('dashboard.logMealEaten')}</p>
-          </Link>
-          <Link
-            href="/dashboard/progress"
-            className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:border-green-300 transition-colors group"
-          >
-            <span className="text-3xl mb-3 block">⚖️</span>
-            <h3 className="font-semibold text-gray-900 group-hover:text-green-600">{t('dashboard.logWeight')}</h3>
-            <p className="text-sm text-gray-500">{t('dashboard.trackProgress')}</p>
-          </Link>
-          <Link
-            href="/dashboard/snacks"
-            className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:border-green-300 transition-colors group"
-          >
-            <span className="text-3xl mb-3 block">🍫</span>
-            <h3 className="font-semibold text-gray-900 group-hover:text-green-600">{t('dashboard.favoriteSnacks')}</h3>
-            <p className="text-sm text-gray-500">{t('dashboard.guiltFreeTreats')}</p>
-          </Link>
-        </div>
+              {/* Streak Card */}
+              <div className="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-xl shadow-sm text-white">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="text-sm text-green-100">{t('dashboard.currentStreak')}</p>
+                    <p className="text-2xl font-bold">{todayStats.currentStreak} {t('dashboard.days')}</p>
+                  </div>
+                  <span className="text-2xl">🔥</span>
+                </div>
+                <p className="text-sm text-green-100">{t('dashboard.keepItUp')}</p>
+              </div>
+            </div>
+
+            {/* Today's Meals */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-semibold text-gray-900">{t('dashboard.todaysMeals')}</h2>
+                <Link href="/dashboard/meals/add" className="text-green-600 hover:text-green-700 text-sm font-medium">
+                  + {t('dashboard.addMeal')}
+                </Link>
+              </div>
+              <div className="space-y-4">
+                {todaysMeals.map((meal, index) => (
+                  <div
+                    key={index}
+                    className={`flex items-center justify-between p-4 rounded-lg border ${
+                      meal.completed ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        meal.completed ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
+                      }`}>
+                        {meal.completed ? '✓' : index + 1}
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {meal.name || <span className="text-gray-400 italic">Not logged yet</span>}
+                        </p>
+                        <p className="text-sm text-gray-500">{meal.type} • {meal.time}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      {meal.name ? (
+                        <>
+                          <p className="font-medium text-gray-900">{meal.calories} {t('dashboard.cal')}</p>
+                          {meal.id && !meal.completed && (
+                            <button
+                              onClick={() => handleToggleMealComplete(meal.id!, true)}
+                              className="text-sm text-green-600 hover:text-green-700"
+                            >
+                              {t('dashboard.markComplete')}
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <Link
+                          href="/dashboard/meals/add"
+                          className="text-sm text-green-600 hover:text-green-700"
+                        >
+                          + {t('common.add')}
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid md:grid-cols-4 gap-4">
+              <Link
+                href="/dashboard/meals/add"
+                className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:border-green-300 transition-colors group"
+              >
+                <span className="text-3xl mb-3 block">➕</span>
+                <h3 className="font-semibold text-gray-900 group-hover:text-green-600">{t('dashboard.addMeal')}</h3>
+                <p className="text-sm text-gray-500">{t('dashboard.logMealEaten')}</p>
+              </Link>
+              <Link
+                href="/dashboard/progress"
+                className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:border-green-300 transition-colors group"
+              >
+                <span className="text-3xl mb-3 block">⚖️</span>
+                <h3 className="font-semibold text-gray-900 group-hover:text-green-600">{t('dashboard.logWeight')}</h3>
+                <p className="text-sm text-gray-500">{t('dashboard.trackProgress')}</p>
+              </Link>
+              <Link
+                href="/dashboard/food-menu"
+                className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:border-green-300 transition-colors group"
+              >
+                <span className="text-3xl mb-3 block">🍽️</span>
+                <h3 className="font-semibold text-gray-900 group-hover:text-green-600">{t('foodMenu.title')}</h3>
+                <p className="text-sm text-gray-500">{t('foodMenu.description')}</p>
+              </Link>
+              <Link
+                href="/dashboard/reports/doctor"
+                className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:border-blue-300 transition-colors group"
+              >
+                <span className="text-3xl mb-3 block">🩺</span>
+                <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">{t('doctorReport.title')}</h3>
+                <p className="text-sm text-gray-500">{t('doctorReport.shareWithDoctor')}</p>
+              </Link>
+            </div>
+          </>
+        )}
       </main>
     </div>
   )

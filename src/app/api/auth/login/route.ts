@@ -1,20 +1,20 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/db'
-import { registerSchema } from '@/lib/validations/auth'
+import { loginSchema } from '@/lib/validations/auth'
 import { rateLimit, getClientIp, rateLimitPresets } from '@/lib/rate-limit'
 import { ZodError } from 'zod'
 
 export async function POST(request: Request) {
   try {
-    // Rate limiting
+    // Rate limiting - stricter for login to prevent brute force
     const clientIp = getClientIp(request)
-    const rateLimitResult = rateLimit(`register:${clientIp}`, rateLimitPresets.auth)
+    const rateLimitResult = rateLimit(`login:${clientIp}`, rateLimitPresets.auth)
 
     if (!rateLimitResult.success) {
       return NextResponse.json(
         {
-          error: 'Too many registration attempts. Please try again later.',
+          error: 'Too many login attempts. Please try again later.',
           retryAfter: rateLimitResult.resetIn
         },
         {
@@ -30,52 +30,32 @@ export async function POST(request: Request) {
     const body = await request.json()
 
     // Validate input with Zod
-    const validatedData = registerSchema.parse(body)
-    const { email, password, name } = validatedData
+    const validatedData = loginSchema.parse(body)
+    const { email, password } = validatedData
 
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
+    // Find user
+    const user = await prisma.user.findUnique({
       where: { email },
     })
 
-    if (existingUser) {
-      // Use generic message to prevent email enumeration
+    // Use constant-time comparison approach - always check password even if user not found
+    // This prevents timing attacks that could reveal if an email exists
+    const dummyHash = '$2a$12$dummy.hash.for.timing.attack.prevention'
+    const passwordToCheck = user?.password || dummyHash
+    const passwordMatch = await bcrypt.compare(password, passwordToCheck)
+
+    if (!user || !user.password || !passwordMatch) {
+      // Generic error message to prevent email enumeration
       return NextResponse.json(
-        { error: 'Unable to create account. Please try a different email.' },
-        { status: 400 }
+        { error: 'Invalid email or password' },
+        { status: 401 }
       )
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12)
-
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        email,
-        name,
-        password: hashedPassword,
-      },
-    })
-
-    // Calculate trial end date (30 days from now)
-    const trialStartDate = new Date()
-    const trialEndDate = new Date()
-    trialEndDate.setDate(trialEndDate.getDate() + 30)
-
-    // Create default profile with trial period
-    await prisma.profile.create({
-      data: {
-        userId: user.id,
-        trialStartDate,
-        trialEndDate,
-        subscriptionStatus: 'trial',
-      },
-    })
-
+    // Return success with user data (actual session creation happens via NextAuth signIn)
     return NextResponse.json(
       {
-        message: 'User created successfully',
+        success: true,
         user: {
           id: user.id,
           email: user.email,
@@ -83,7 +63,7 @@ export async function POST(request: Request) {
         },
       },
       {
-        status: 201,
+        status: 200,
         headers: {
           'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
         }
@@ -102,7 +82,7 @@ export async function POST(request: Request) {
       )
     }
 
-    console.error('Registration error:', error)
+    console.error('Login error:', error)
     return NextResponse.json(
       { error: 'Something went wrong' },
       { status: 500 }
